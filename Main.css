@@ -1,0 +1,24 @@
+#plantillas{
+    display:none;
+}
+
+.led_encendido{
+	background-color: red !important;
+}
+.boton_enviar {
+	height: 100px;
+	width: 100px;
+	border-radius: 30px; 
+	background-color: red; 
+}
+
+.led {
+	display: inline-block;
+	background-color: black;
+	height: 90px;
+	width: 90px;
+	border-radius: 50px;
+	border-color: gray;
+	border-width: 5px;
+	border-style: solid;
+}
