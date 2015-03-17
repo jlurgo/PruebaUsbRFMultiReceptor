@@ -83,10 +83,17 @@ void loop(void)
 		radio.stopListening();
 		
 		for(int i=0; i<strlen(json); i++){
-			bool ok = radio.write((json + i), 1);
+			bool ok = false;
+			while(!ok){
+				ok = radio.write((json + i), 1);
+			}			
 		}
-                char final = '|';
-                bool ok = radio.write(&final, 1);
+		char final = '|';
+		bool ok = false;
+		while(!ok){
+			ok = radio.write(&final, 1);
+		}	
+							 
 		radio.startListening();
 		
 		free(json);
@@ -124,3 +131,4 @@ void loop(void)
 		}
 	}
 }
+

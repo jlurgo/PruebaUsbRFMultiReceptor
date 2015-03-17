@@ -20,8 +20,8 @@ void setup(void)
   	radio.setRetries(15,15);
   	radio.setPayloadSize(8);
 		
-    radio.openReadingPipe(1,0xF0F0F0F0D1LL);
-    radio.openReadingPipe(2,0xF0F0F0F0D2LL);
+	radio.openReadingPipe(1,0xF0F0F0F0D1LL);
+	radio.openReadingPipe(2,0xF0F0F0F0D2LL);
 
   	radio.startListening();
 	blanquearBufferEntrada();
@@ -65,10 +65,16 @@ void serialEvent() {
 					radio.stopListening();
 					radio.openWritingPipe(pipe_escritura);
 					for(int i=0; i<strlen(json); i++){
-						bool ok = radio.write((json + i), 1);
+						bool ok = false;
+						while(!ok){
+							ok = radio.write((json + i), 1);
+						}
 					}
 					char final = '|';
-					bool ok = radio.write(&final, 1);
+					bool ok = false;
+					while(!ok){
+						ok = radio.write(&final, 1);
+					}
 					radio.startListening();
 
 					free(json);
@@ -88,3 +94,5 @@ void serialEvent() {
 		}
 	}
 }
+
+
