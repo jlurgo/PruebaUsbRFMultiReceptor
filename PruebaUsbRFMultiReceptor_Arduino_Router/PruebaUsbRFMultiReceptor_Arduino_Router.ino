@@ -4,8 +4,12 @@
 #include "nRF24L01.h"
 #include "RF24.h"
 #include "printf.h"
+#define SIZE_BUFFER_ENTRADA 256
 
 RF24 radio(9,10);
+
+char buffer_entrada[256];
+int ultimo_byte_entrada = 0;
 
 void setup(void)
 { 
@@ -20,8 +24,15 @@ void setup(void)
     radio.openReadingPipe(2,0xF0F0F0F0D2LL);
 
   	radio.startListening();
+	blanquearBufferEntrada();
 	
   	radio.printDetails();	
+}
+
+void blanquearBufferEntrada(void){
+	for(int i=0; i<SIZE_BUFFER_ENTRADA; i++){
+		buffer_entrada[i] = '\0';	
+	}	
 }
 
 void loop(void)
@@ -63,7 +74,7 @@ void serialEvent() {
 					free(json);
 					
 				}else{
-					Serial.println("el mensaje no tiene estadoBoton");
+					Serial.println("el mensaje no tiene idNodo");
 				}				
 			}else{
 				Serial.println("error al interpretar json");
@@ -75,14 +86,5 @@ void serialEvent() {
 			buffer_entrada[ultimo_byte_entrada] = byte_leido;	
 			ultimo_byte_entrada++;
 		}
-		
-		
-		
-		
-		char char_recibido_serie = Serial.read();
-		//envio radio
-		radio.stopListening();
-		bool ok = radio.write( &char_recibido_serie, 1);
-		radio.startListening();
 	}
 }
