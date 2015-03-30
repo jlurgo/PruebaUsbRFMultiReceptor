@@ -9,6 +9,7 @@ var onDeviceReady = function() {
 	
 	var control_1 = new ControlLed(1);
 	var control_2 = new ControlLed(2);
+	var control_2 = new ControlLed(3);
 	
 	var errorCallback = function(message) {
 		console.log('Error: ' + message);

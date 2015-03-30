@@ -16,13 +16,14 @@ var DivConsola = {
 							div_entrada.text(div_entrada.text() + JSON.stringify(arg));
 						} catch(err){
 							div_entrada.text(div_entrada.text() + "imposible serializar objeto");
-						}
+						}					
 					}
 					else 
-						div_entrada.text(div_entrada.text() + arg.toString())
-				};
+						div_entrada.text(div_entrada.text() + arg.toString());
+				};				
 			});
 			_this.divConsola.append(div_entrada);
+			_this.divConsola[0].scrollTop = _this.divConsola[0].scrollHeight;
 			oldLog.apply(console, arguments);
 		};		
 		

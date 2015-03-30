@@ -11,8 +11,19 @@ RF24 radio(9,10);
 char buffer_entrada[256];
 int ultimo_byte_entrada = 0;
 
+const int buttonPin = 2;     // the number of the pushbutton pin
+const int ledPin =  3;      // the number of the LED pin
+int estadoAnteriorBoton = 0;
+int estadoActualBoton = 0;
+const int id_nodo = 3;
+
+const char* estados_boton[] = { "suelto", "presionado"};
+
 void setup(void)
 { 
+	pinMode(ledPin, OUTPUT);      
+  	pinMode(buttonPin, INPUT);  
+	
   	Serial.begin(115200);
 	printf_begin();
 
@@ -36,7 +47,27 @@ void blanquearBufferEntrada(void){
 }
 
 void loop(void)
-{
+{	
+	estadoActualBoton = digitalRead(buttonPin);
+
+	if(estadoActualBoton != estadoAnteriorBoton)
+	{
+		aJsonObject *mensaje;
+		mensaje=aJson.createObject();  
+		aJson.addItemToObject(mensaje, "estadoBoton", aJson.createItem(estados_boton[estadoActualBoton]));
+		aJson.addItemToObject(mensaje, "idNodo", aJson.createItem(id_nodo));
+		
+		char *json = aJson.print(mensaje);
+		
+		Serial.print(json);
+		Serial.write('|');
+                
+		free(json);
+		aJson.deleteItem(mensaje);
+	}
+	estadoAnteriorBoton = estadoActualBoton;
+	
+	
 	if (radio.available()){
 		char char_recibido_radio;
 		bool done = false;
@@ -59,26 +90,36 @@ void serialEvent() {
 					uint64_t pipe_escritura;
 					if(idNodo->valueint==1) pipe_escritura = 0xF0F0F0F0E1LL;
 					if(idNodo->valueint==2) pipe_escritura = 0xF0F0F0F0E2LL;
-					
-					char *json = aJson.print(msg);
+					if(idNodo->valueint==3)
+					{
+						aJsonObject *estadoBoton = aJson.getObjectItem(msg, "estadoBoton");
+						if (estadoBoton) {
+							if(strcmp(estadoBoton->valuestring, "presionado")==0)digitalWrite(ledPin, HIGH);
+							if(strcmp(estadoBoton->valuestring, "suelto")==0)digitalWrite(ledPin, LOW);
+						}else{
+							Serial.println("el mensaje no tiene estadoBoton");
+						}								
+					}else{
+						char *json = aJson.print(msg);
 		
-					radio.stopListening();
-					radio.openWritingPipe(pipe_escritura);
-					for(int i=0; i<strlen(json); i++){
+						radio.stopListening();
+						radio.openWritingPipe(pipe_escritura);
+						for(int i=0; i<strlen(json); i++){
+							bool ok = false;
+							while(!ok){
+								ok = radio.write((json + i), 1);
+							}
+						}
+						char final = '|';
 						bool ok = false;
 						while(!ok){
-							ok = radio.write((json + i), 1);
+							ok = radio.write(&final, 1);
 						}
-					}
-					char final = '|';
-					bool ok = false;
-					while(!ok){
-						ok = radio.write(&final, 1);
-					}
-					radio.startListening();
+						radio.startListening();
 
-					free(json);
-					
+						free(json);
+						
+					}					
 				}else{
 					Serial.println("el mensaje no tiene idNodo");
 				}				
@@ -94,5 +135,6 @@ void serialEvent() {
 		}
 	}
 }
+
 
 
